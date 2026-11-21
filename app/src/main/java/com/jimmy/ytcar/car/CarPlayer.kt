@@ -6,6 +6,8 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
+import android.view.MotionEvent
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.webkit.WebChromeClient
 import android.webkit.WebView
@@ -108,6 +110,24 @@ class CarPlayer(context: Context) : CarPlayerHandle {
         if (o.optBoolean("e") && !endedReported) {
             endedReported = true
             PlaybackController.onEnded()
+        }
+    }
+
+    /** 車機觸控點擊 → 轉給 WebView，讓 YouTube 播放器自己的控制介面（畫質、字幕、進度）可以操作 */
+    fun tap(x: Float, y: Float) {
+        handler.post {
+            if (destroyed) return@post
+            val t = SystemClock.uptimeMillis()
+            val down = MotionEvent.obtain(t, t, MotionEvent.ACTION_DOWN, x, y, 0)
+            web.dispatchTouchEvent(down)
+            down.recycle()
+            handler.postDelayed({
+                if (destroyed) return@postDelayed
+                val t2 = SystemClock.uptimeMillis()
+                val up = MotionEvent.obtain(t2, t2, MotionEvent.ACTION_UP, x, y, 0)
+                web.dispatchTouchEvent(up)
+                up.recycle()
+            }, 60)
         }
     }
 

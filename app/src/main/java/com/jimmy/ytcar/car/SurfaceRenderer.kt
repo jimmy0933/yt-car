@@ -48,6 +48,10 @@ class SurfaceRenderer(private val context: Context) : SurfaceCallback {
         }
     }
 
+    override fun onClick(x: Float, y: Float) {
+        player?.tap(x, y)
+    }
+
     override fun onSurfaceDestroyed(container: SurfaceContainer) = release()
 
     fun release() {
