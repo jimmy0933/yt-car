@@ -32,6 +32,7 @@ class CarPlayer(context: Context) : CarPlayerHandle {
     private var endedReported = false
     private var currentId: String? = null
     private var destroyed = false
+    private val media = MediaBridge(context)
 
     private val tick = object : Runnable {
         override fun run() {
@@ -120,6 +121,7 @@ class CarPlayer(context: Context) : CarPlayerHandle {
             o.optBoolean("p"),
             title,
         )
+        media.update(PlaybackController.state.value)
         if (overlay.visibility == View.VISIBLE) overlay.text = "🚗 行駛中 · 僅播放聲音\n\n$title"
         if (o.optBoolean("e") && !endedReported) {
             endedReported = true
@@ -130,6 +132,7 @@ class CarPlayer(context: Context) : CarPlayerHandle {
     fun destroy() {
         destroyed = true
         handler.removeCallbacksAndMessages(null)
+        media.release()
         web.stopLoading()
         web.destroy()
     }
@@ -140,7 +143,7 @@ class CarPlayer(context: Context) : CarPlayerHandle {
 html,body{background:#000!important;overflow:hidden!important}
 ytm-mobile-topbar-renderer,header,#header-bar,.mobile-topbar-header,ytm-pivot-bar-renderer,
 ytm-single-column-watch-next-results-renderer,ytm-item-section-renderer,.watch-below-the-player,
-ytm-engagement-panel,bottom-sheet-container,ytm-consent-bump-v2-renderer{display:none!important}
+ytm-engagement-panel,bottom-sheet-container,.ytp-unmute,.ytp-unmute-inner,.ytp-unmute-animated,.ytp-unmute-text,ytm-consent-bump-v2-renderer{display:none!important}
 #player-container-id,#player-container,.player-container,#player,#movie_player,.html5-video-player{
 position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:100vh!important;
 max-height:none!important;margin:0!important;padding:0!important;z-index:2147483646!important;background:#000!important}
@@ -154,6 +157,9 @@ video{position:absolute!important;top:0!important;left:0!important;width:100vw!i
   if(!document.getElementById('ytcar-css')){var s=document.createElement('style');s.id='ytcar-css';
     s.textContent=$CSS_JS;(document.head||document.documentElement).appendChild(s);}
   var v=document.querySelector('video'); if(!v) return null;
+  var mp=document.getElementById('movie_player');
+  if(want && mp){ try{ if(mp.isMuted&&mp.isMuted()) mp.unMute(); if(mp.getVolume&&mp.getVolume()<100) mp.setVolume(100); }catch(e){} }
+  if(want && v.muted){ v.muted=false; }
   if(want && v.paused && !v.ended){ v.muted=false; var p=v.play(); if(p&&p.catch)p.catch(function(){}); }
   if(!want && !v.paused) v.pause();
   return {t:v.currentTime||0,d:v.duration||0,p:!v.paused,e:v.ended,title:document.title||''};
