@@ -15,7 +15,7 @@ data class PlayerState(
     val playing: Boolean = false,
     val queue: List<QueueItem> = emptyList(),
     /** 乘客模式：行車中也顯示影片 */
-    val passengerMode: Boolean = false,
+    val passengerMode: Boolean = true,
     /** 車速（km/h），null = 車機未提供 */
     val speedKmh: Float? = null,
 ) {

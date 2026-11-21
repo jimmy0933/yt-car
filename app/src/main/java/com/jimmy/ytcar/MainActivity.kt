@@ -13,7 +13,6 @@ import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.app.ActivityCompat
@@ -21,10 +20,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.launch
-import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
-import kotlin.concurrent.thread
 
 /**
  * 手機端 = 遙控器。上半部是已登入的 YouTube，點影片時會攔截下來送到車機播放；
@@ -62,13 +57,7 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) web.loadUrl(HOME) else web.restoreState(savedInstanceState)
 
         findViewById<Button>(R.id.btnHome).setOnClickListener { web.loadUrl(HOME) }
-        findViewById<Button>(R.id.btnBack).setOnClickListener { PlaybackController.seekBy(-10) }
-        findViewById<Button>(R.id.btnFwd).setOnClickListener { PlaybackController.seekBy(10) }
         findViewById<Button>(R.id.btnPlay).setOnClickListener { PlaybackController.togglePlay() }
-        findViewById<Button>(R.id.btnNext).setOnClickListener {
-            if (PlaybackController.state.value.queue.isEmpty()) toast("佇列是空的") else PlaybackController.next()
-        }
-        findViewById<Button>(R.id.btnQueue).setOnClickListener { showQueue() }
         swPassenger.setOnCheckedChangeListener { _, on -> PlaybackController.setPassengerMode(on) }
 
         seek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -138,24 +127,8 @@ class MainActivity : AppCompatActivity() {
             toast("車機未連線：請先在 Android Auto 中開啟 YtCar")
             return
         }
-        if (s.videoId == null) {
-            PlaybackController.playNow(id)
-            toast("▶ 已在車機播放")
-            return
-        }
-        AlertDialog.Builder(this)
-            .setTitle("送到車機")
-            .setItems(arrayOf("立即播放", "加入佇列")) { _, which ->
-                if (which == 0) {
-                    PlaybackController.playNow(id)
-                } else {
-                    PlaybackController.enqueue(QueueItem(id))
-                    fetchTitle(id)
-                    toast("已加入佇列")
-                }
-            }
-            .setNegativeButton("取消", null)
-            .show()
+        PlaybackController.playNow(id)
+        toast("▶ 已在車機播放")
     }
 
     private fun pausePhoneVideo() {
@@ -163,42 +136,12 @@ class MainActivity : AppCompatActivity() {
         listOf(0L, 400L, 1200L, 2500L).forEach { d -> main.postDelayed({ web.evaluateJavascript(js, null) }, d) }
     }
 
-    private fun fetchTitle(id: String) = thread {
-        runCatching {
-            val c = URL("https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=$id")
-                .openConnection() as HttpURLConnection
-            c.connectTimeout = 5000
-            c.readTimeout = 5000
-            val t = JSONObject(c.inputStream.bufferedReader().readText()).optString("title")
-            if (t.isNotBlank()) main.post { PlaybackController.updateQueueTitle(id, t) }
-        }
-    }
-
-    private fun showQueue() {
-        val q = PlaybackController.state.value.queue
-        if (q.isEmpty()) { toast("佇列是空的"); return }
-        val labels = q.mapIndexed { i, it -> "${i + 1}. ${it.title.ifBlank { it.id }}" }.toTypedArray()
-        AlertDialog.Builder(this)
-            .setTitle("播放佇列")
-            .setItems(labels) { _, i ->
-                AlertDialog.Builder(this)
-                    .setTitle(labels[i])
-                    .setItems(arrayOf("立即播放", "移除")) { _, w ->
-                        if (w == 0) PlaybackController.playFromQueue(i) else PlaybackController.removeFromQueue(i)
-                    }
-                    .show()
-            }
-            .setNeutralButton("清空") { _, _ -> PlaybackController.clearQueue() }
-            .setNegativeButton("關閉", null)
-            .show()
-    }
-
     private fun render(s: PlayerState) {
         val speed = s.speedKmh?.let { "%.0f km/h".format(it) } ?: "車速無法取得"
         status.text = when {
             !s.carConnected -> "🚗 車機未連線（在 Android Auto 開啟 YtCar 後，點影片就會送到車機）"
             s.audioOnly -> "🚗 已連線 · $speed · 行駛中僅聲音"
-            else -> "🚗 已連線 · $speed" + if (s.queue.isNotEmpty()) " · 佇列 ${s.queue.size}" else ""
+            else -> "🚗 已連線 · $speed"
         }
         title.text = if (s.videoId == null) "尚未播放" else (if (s.playing) "▶ " else "⏸ ") + s.title
         seek.max = maxOf(s.duration, 1)

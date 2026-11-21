@@ -64,27 +64,16 @@
             <Button android:id="@+id/btnHome" style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
                 android:text="🏠" android:textSize="20sp" />
-            <Button android:id="@+id/btnBack" style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
-                android:text="⏪10" android:textSize="16sp" />
             <Button android:id="@+id/btnPlay" style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
                 android:text="⏯" android:textSize="22sp" />
-            <Button android:id="@+id/btnFwd" style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
-                android:text="10⏩" android:textSize="16sp" />
-            <Button android:id="@+id/btnNext" style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
-                android:text="⏭" android:textSize="20sp" />
-            <Button android:id="@+id/btnQueue" style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
-                android:text="☰" android:textSize="20sp" />
         </LinearLayout>
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/swPassenger"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:checked="true"
             android:text="乘客模式（行車中也顯示影片）"
             android:textColor="#FFFFFF" />
     </LinearLayout>
