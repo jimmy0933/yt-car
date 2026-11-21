@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <WebView
+        android:id="@+id/web"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/panel"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#BBBBBB"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:paddingTop="2dp"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <SeekBar
+                android:id="@+id/seek"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#BBBBBB"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button android:id="@+id/btnHome" style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:text="🏠" android:textSize="20sp" />
+            <Button android:id="@+id/btnBack" style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:text="⏪10" android:textSize="16sp" />
+            <Button android:id="@+id/btnPlay" style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:text="⏯" android:textSize="22sp" />
+            <Button android:id="@+id/btnFwd" style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:text="10⏩" android:textSize="16sp" />
+            <Button android:id="@+id/btnNext" style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:text="⏭" android:textSize="20sp" />
+            <Button android:id="@+id/btnQueue" style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:text="☰" android:textSize="20sp" />
+        </LinearLayout>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/swPassenger"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="乘客模式（行車中也顯示影片）"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+</LinearLayout>
