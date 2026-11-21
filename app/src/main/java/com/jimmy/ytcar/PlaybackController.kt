@@ -83,9 +83,10 @@ object PlaybackController {
         if (_state.value.queue.isNotEmpty()) playFromQueue(0)
     }
 
-    fun togglePlay() = player?.setWantPlaying(!_state.value.playing)
-    fun seekBy(sec: Int) = player?.seekBy(sec)
-    fun seekTo(sec: Int) = player?.seekTo(sec)
+    fun togglePlay() { player?.setWantPlaying(!_state.value.playing) }
+    fun setWantPlaying(play: Boolean) { player?.setWantPlaying(play) }
+    fun seekBy(sec: Int) { player?.seekBy(sec) }
+    fun seekTo(sec: Int) { player?.seekTo(sec) }
 
     fun setPassengerMode(on: Boolean) {
         _state.update { it.copy(passengerMode = on) }

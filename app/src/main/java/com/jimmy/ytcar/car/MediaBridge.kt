@@ -53,12 +53,12 @@ class MediaBridge(context: Context) {
     init {
         session.setCallback(object : MediaSession.Callback() {
             override fun onPlay() { requestFocus(); PlaybackController.setWantPlaying(true) }
-            override fun onPause() = PlaybackController.setWantPlaying(false)
-            override fun onSkipToNext() = PlaybackController.next()
-            override fun onSkipToPrevious() = PlaybackController.seekBy(-10)
-            override fun onFastForward() = PlaybackController.seekBy(10)
-            override fun onRewind() = PlaybackController.seekBy(-10)
-            override fun onSeekTo(pos: Long) = PlaybackController.seekTo((pos / 1000).toInt())
+            override fun onPause() { PlaybackController.setWantPlaying(false) }
+            override fun onSkipToNext() { PlaybackController.next() }
+            override fun onSkipToPrevious() { PlaybackController.seekBy(-10) }
+            override fun onFastForward() { PlaybackController.seekBy(10) }
+            override fun onRewind() { PlaybackController.seekBy(-10) }
+            override fun onSeekTo(pos: Long) { PlaybackController.seekTo((pos / 1000).toInt()) }
         }, Handler(Looper.getMainLooper()))
         session.isActive = true
         publish(PlaybackController.state.value)
