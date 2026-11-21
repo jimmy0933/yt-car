@@ -14,13 +14,7 @@ data class PlayerState(
     val duration: Int = 0,
     val playing: Boolean = false,
     val queue: List<QueueItem> = emptyList(),
-    /** 乘客模式：行車中也顯示影片 */
-    val passengerMode: Boolean = true,
-    /** 車速（km/h），null = 車機未提供 */
-    val speedKmh: Float? = null,
 ) {
-    val moving: Boolean get() = (speedKmh ?: 0f) > 7f
-    val audioOnly: Boolean get() = moving && !passengerMode
 }
 
 /** 車機播放器需要提供給 Controller 的操作 */
@@ -29,7 +23,6 @@ interface CarPlayerHandle {
     fun setWantPlaying(play: Boolean)
     fun seekBy(sec: Int)
     fun seekTo(sec: Int)
-    fun setAudioOnly(audioOnly: Boolean, title: String)
 }
 
 /** 手機端（遙控）與車機端（播放）共用的單一狀態來源，全部在主執行緒呼叫。 */
@@ -44,7 +37,6 @@ object PlaybackController {
         _state.update { it.copy(carConnected = true) }
         val s = _state.value
         s.videoId?.let { p.load(it, s.position) }
-        p.setAudioOnly(s.audioOnly, s.title)
     }
 
     fun detach(p: CarPlayerHandle) {
@@ -88,17 +80,6 @@ object PlaybackController {
     fun seekBy(sec: Int) { player?.seekBy(sec) }
     fun seekTo(sec: Int) { player?.seekTo(sec) }
 
-    fun setPassengerMode(on: Boolean) {
-        _state.update { it.copy(passengerMode = on) }
-        applyAudioOnly()
-    }
-
-    fun onSpeed(metersPerSecond: Float?) {
-        val before = _state.value.audioOnly
-        _state.update { it.copy(speedKmh = metersPerSecond?.let { v -> v * 3.6f }) }
-        if (before != _state.value.audioOnly) applyAudioOnly()
-    }
-
     /** 車機端每秒回報一次 */
     fun onStatus(position: Int, duration: Int, playing: Boolean, title: String) {
         _state.update {
@@ -112,9 +93,4 @@ object PlaybackController {
     }
 
     fun onEnded() = next()
-
-    private fun applyAudioOnly() {
-        val s = _state.value
-        player?.setAudioOnly(s.audioOnly, s.title)
-    }
 }

@@ -14,8 +14,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SwitchCompat
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -31,7 +29,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var title: TextView
     private lateinit var seek: SeekBar
     private lateinit var time: TextView
-    private lateinit var swPassenger: SwitchCompat
     private val main = Handler(Looper.getMainLooper())
     private var dragging = false
     private var lastHandled: Pair<String, Long>? = null
@@ -45,7 +42,6 @@ class MainActivity : AppCompatActivity() {
         title = findViewById(R.id.title)
         seek = findViewById(R.id.seek)
         time = findViewById(R.id.time)
-        swPassenger = findViewById(R.id.swPassenger)
 
         WebSetup.apply(web)
         web.webViewClient = object : WebViewClient() {
@@ -58,7 +54,6 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btnHome).setOnClickListener { web.loadUrl(HOME) }
         findViewById<Button>(R.id.btnPlay).setOnClickListener { PlaybackController.togglePlay() }
-        swPassenger.setOnCheckedChangeListener { _, on -> PlaybackController.setPassengerMode(on) }
 
         seek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(sb: SeekBar, p: Int, fromUser: Boolean) {
@@ -83,7 +78,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        ActivityCompat.requestPermissions(this, arrayOf(CAR_SPEED), 1)
         handleShareIntent(intent)
     }
 
@@ -137,19 +131,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun render(s: PlayerState) {
-        val speed = s.speedKmh?.let { "%.0f km/h".format(it) } ?: "車速無法取得"
-        status.text = when {
-            !s.carConnected -> "🚗 車機未連線（在 Android Auto 開啟 YtCar 後，點影片就會送到車機）"
-            s.audioOnly -> "🚗 已連線 · $speed · 行駛中僅聲音"
-            else -> "🚗 已連線 · $speed"
-        }
+        status.text = if (s.carConnected) "🚗 車機已連線" else "🚗 車機未連線（在 Android Auto 開啟 YtCar 後，點影片就會送到車機）"
         title.text = if (s.videoId == null) "尚未播放" else (if (s.playing) "▶ " else "⏸ ") + s.title
         seek.max = maxOf(s.duration, 1)
         if (!dragging) {
             seek.progress = s.position
             time.text = "${fmt(s.position)} / ${fmt(s.duration)}"
         }
-        if (swPassenger.isChecked != s.passengerMode) swPassenger.isChecked = s.passengerMode
     }
 
     private fun fmt(sec: Int): String {
@@ -163,6 +151,5 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val HOME = "https://m.youtube.com/"
-        private const val CAR_SPEED = "com.google.android.gms.permission.CAR_SPEED"
     }
 }

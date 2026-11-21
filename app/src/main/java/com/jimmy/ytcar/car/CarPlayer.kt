@@ -6,15 +6,11 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
-import android.util.TypedValue
-import android.view.Gravity
-import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
-import android.widget.TextView
 import com.jimmy.ytcar.CarPlayerHandle
 import com.jimmy.ytcar.PlaybackController
 import com.jimmy.ytcar.WebSetup
@@ -25,7 +21,6 @@ import org.json.JSONObject
 class CarPlayer(context: Context) : CarPlayerHandle {
     val root = FrameLayout(context)
     private val web = WebView(context)
-    private val overlay = TextView(context)
     private val handler = Handler(Looper.getMainLooper())
 
     private var wantPlaying = true
@@ -57,13 +52,6 @@ class CarPlayer(context: Context) : CarPlayerHandle {
                 Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
         }
         root.addView(web, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
-
-        overlay.setBackgroundColor(Color.BLACK)
-        overlay.setTextColor(Color.WHITE)
-        overlay.gravity = Gravity.CENTER
-        overlay.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
-        overlay.visibility = View.GONE
-        root.addView(overlay, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
 
         showIdle()
         handler.post(tick)
@@ -106,11 +94,6 @@ class CarPlayer(context: Context) : CarPlayerHandle {
         )
     }
 
-    override fun setAudioOnly(audioOnly: Boolean, title: String) {
-        overlay.text = "🚗 行駛中 · 僅播放聲音\n\n$title"
-        overlay.visibility = if (audioOnly) View.VISIBLE else View.GONE
-    }
-
     private fun onTick(result: String?) {
         if (destroyed || result == null || result == "null") return
         val o = runCatching { JSONObject(result) }.getOrNull() ?: return
@@ -122,7 +105,6 @@ class CarPlayer(context: Context) : CarPlayerHandle {
             title,
         )
         media.update(PlaybackController.state.value)
-        if (overlay.visibility == View.VISIBLE) overlay.text = "🚗 行駛中 · 僅播放聲音\n\n$title"
         if (o.optBoolean("e") && !endedReported) {
             endedReported = true
             PlaybackController.onEnded()
