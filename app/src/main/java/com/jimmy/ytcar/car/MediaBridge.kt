@@ -69,7 +69,9 @@ class MediaBridge(context: Context) {
     }
 
     fun release() {
-        session.isActive = false
-        session.release()
+        runCatching {
+            session.isActive = false
+            session.release()
+        }
     }
 }

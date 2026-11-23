@@ -27,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var web: WebView
     private lateinit var status: TextView
     private lateinit var title: TextView
+    private lateinit var debug: TextView
     private lateinit var seek: SeekBar
     private lateinit var time: TextView
     private val main = Handler(Looper.getMainLooper())
@@ -40,6 +41,7 @@ class MainActivity : AppCompatActivity() {
         web = findViewById(R.id.web)
         status = findViewById(R.id.status)
         title = findViewById(R.id.title)
+        debug = findViewById(R.id.debug)
         seek = findViewById(R.id.seek)
         time = findViewById(R.id.time)
 
@@ -134,6 +136,7 @@ class MainActivity : AppCompatActivity() {
         status.text = if (s.carConnected && s.surfaceReady) "🚗 車機已連線"
         else if (s.carConnected) "🚗 車機已連線，但 YtCar 畫面不在前景（在車機開啟 YtCar 後會從選好的影片開始播）"
         else "🚗 車機未連線（在 Android Auto 開啟 YtCar 後，點影片就會送到車機）"
+        debug.text = s.events.joinToString("\n")
         title.text = if (s.videoId == null) "尚未播放" else (if (s.playing) "▶ " else "⏸ ") + s.title
         seek.max = maxOf(s.duration, 1)
         if (!dragging) {

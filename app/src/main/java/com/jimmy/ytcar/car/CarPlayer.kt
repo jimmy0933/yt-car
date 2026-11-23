@@ -44,7 +44,22 @@ class CarPlayer(context: Context) : CarPlayerHandle {
         web.setBackgroundColor(Color.BLACK)
         WebSetup.apply(web)
         web.webViewClient = object : WebViewClient() {
+            override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
+                PlaybackController.log("載入 ${url.take(40)}")
+            }
+
+            override fun onReceivedError(view: WebView, request: android.webkit.WebResourceRequest, error: android.webkit.WebResourceError) {
+                if (request.isForMainFrame) PlaybackController.log("網頁錯誤 ${error.errorCode} ${error.description}")
+            }
+
+            override fun onRenderProcessGone(view: WebView, detail: android.webkit.RenderProcessGoneDetail): Boolean {
+                PlaybackController.log("渲染程序當掉，重新載入")
+                currentId?.let { id -> handler.post { if (!destroyed) load(id, PlaybackController.state.value.position) } }
+                return true
+            }
+
             override fun onPageFinished(view: WebView, url: String) {
+                PlaybackController.log("載入完成")
                 if (currentId != null) view.evaluateJavascript(tickJs(wantPlaying), null)
             }
         }
@@ -129,6 +144,11 @@ class CarPlayer(context: Context) : CarPlayerHandle {
                 up.recycle()
             }, 60)
         }
+    }
+
+    override fun stopAndDestroy() {
+        stopPlayback()
+        destroy()
     }
 
     /** 離開車機畫面前先暫停影片並載入空白頁，確保聲音一定停掉 */

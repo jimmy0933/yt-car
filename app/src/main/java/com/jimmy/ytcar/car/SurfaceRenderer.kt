@@ -20,8 +20,9 @@ class SurfaceRenderer(private val context: Context) : SurfaceCallback {
     private var player: CarPlayer? = null
 
     override fun onSurfaceAvailable(container: SurfaceContainer) {
-        val surface = container.surface ?: return
-        if (container.width <= 0 || container.height <= 0) return
+        PlaybackController.log("車機畫面可用 ${container.width}x${container.height} dpi=${container.dpi}")
+        val surface = container.surface ?: run { PlaybackController.log("surface 為空"); return }
+        if (container.width <= 0 || container.height <= 0) { PlaybackController.log("畫面尺寸為 0，略過"); return }
         release()
         try {
             val dm = context.getSystemService(DisplayManager::class.java)
@@ -39,11 +40,13 @@ class SurfaceRenderer(private val context: Context) : SurfaceCallback {
             val cp = CarPlayer(p.context)
             p.setContentView(cp.root)
             p.show()
+            PlaybackController.log("Presentation 已顯示")
             presentation = p
             player = cp
             PlaybackController.attach(cp)
         } catch (e: Exception) {
             Log.e("YtCar", "無法建立車機畫面", e)
+            PlaybackController.log("建立畫面失敗：${e.javaClass.simpleName} ${e.message}")
             release()
         }
     }
@@ -52,7 +55,10 @@ class SurfaceRenderer(private val context: Context) : SurfaceCallback {
         player?.tap(x, y)
     }
 
-    override fun onSurfaceDestroyed(container: SurfaceContainer) = release()
+    override fun onSurfaceDestroyed(container: SurfaceContainer) {
+        PlaybackController.log("車機畫面被收回")
+        release()
+    }
 
     fun release() {
         val p = player

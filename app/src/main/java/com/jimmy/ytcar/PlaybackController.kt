@@ -17,6 +17,8 @@ data class PlayerState(
     val duration: Int = 0,
     val playing: Boolean = false,
     val queue: List<QueueItem> = emptyList(),
+    /** 診斷用：最近的車機事件 */
+    val events: List<String> = emptyList(),
 ) {
 }
 
@@ -26,6 +28,7 @@ interface CarPlayerHandle {
     fun setWantPlaying(play: Boolean)
     fun seekBy(sec: Int)
     fun seekTo(sec: Int)
+    fun stopAndDestroy()
 }
 
 /** 手機端（遙控）與車機端（播放）共用的單一狀態來源，全部在主執行緒呼叫。 */
@@ -35,8 +38,19 @@ object PlaybackController {
 
     private var player: CarPlayerHandle? = null
 
+    fun log(msg: String) {
+        val t = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.US).format(java.util.Date())
+        _state.update { it.copy(events = (it.events + "$t $msg").takeLast(6)) }
+    }
+
     fun attach(p: CarPlayerHandle) {
+        val old = player
+        if (old != null && old !== p) {
+            log("清掉舊播放器")
+            old.stopAndDestroy()
+        }
         player = p
+        log("播放器已建立 id=${_state.value.videoId ?: "-"}")
         _state.update { it.copy(carConnected = true, surfaceReady = true) }
         val s = _state.value
         s.videoId?.let { p.load(it, s.position) }
