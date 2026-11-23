@@ -7,7 +7,10 @@ import kotlinx.coroutines.flow.update
 data class QueueItem(val id: String, val title: String = "")
 
 data class PlayerState(
+    /** 車機連線中（Android Auto 的 YtCar Screen 還在，不論是否在前景） */
     val carConnected: Boolean = false,
+    /** YtCar 的車機畫面目前在前景、播放器已建立 */
+    val surfaceReady: Boolean = false,
     val videoId: String? = null,
     val title: String = "",
     val position: Int = 0,
@@ -34,7 +37,7 @@ object PlaybackController {
 
     fun attach(p: CarPlayerHandle) {
         player = p
-        _state.update { it.copy(carConnected = true) }
+        _state.update { it.copy(carConnected = true, surfaceReady = true) }
         val s = _state.value
         s.videoId?.let { p.load(it, s.position) }
     }
@@ -42,8 +45,12 @@ object PlaybackController {
     fun detach(p: CarPlayerHandle) {
         if (player === p) {
             player = null
-            _state.update { it.copy(carConnected = false, playing = false) }
+            _state.update { it.copy(surfaceReady = false, playing = false) }
         }
+    }
+
+    fun setCarSession(active: Boolean) {
+        _state.update { it.copy(carConnected = active, surfaceReady = if (active) it.surfaceReady else false) }
     }
 
     fun playNow(id: String, title: String = "") {

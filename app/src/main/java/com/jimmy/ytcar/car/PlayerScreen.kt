@@ -18,6 +18,7 @@ class PlayerScreen(carContext: CarContext) : Screen(carContext) {
     init {
         lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onCreate(owner: LifecycleOwner) {
+                PlaybackController.setCarSession(true)
                 carContext.getCarService(AppManager::class.java).setSurfaceCallback(renderer)
             }
 
@@ -27,6 +28,7 @@ class PlayerScreen(carContext: CarContext) : Screen(carContext) {
             }
 
             override fun onDestroy(owner: LifecycleOwner) {
+                PlaybackController.setCarSession(false)
                 carContext.getCarService(AppManager::class.java).setSurfaceCallback(null)
                 renderer.release()
             }

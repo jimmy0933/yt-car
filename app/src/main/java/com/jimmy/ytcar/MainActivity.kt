@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
         PlaybackController.playNow(id)
-        toast("▶ 已在車機播放")
+        toast(if (s.surfaceReady) "▶ 已在車機播放" else "已送到車機，開啟車機上的 YtCar 後開始播放")
     }
 
     private fun pausePhoneVideo() {
@@ -131,7 +131,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun render(s: PlayerState) {
-        status.text = if (s.carConnected) "🚗 車機已連線" else "🚗 車機未連線（在 Android Auto 開啟 YtCar 後，點影片就會送到車機）"
+        status.text = if (s.carConnected && s.surfaceReady) "🚗 車機已連線"
+        else if (s.carConnected) "🚗 車機已連線，但 YtCar 畫面不在前景（在車機開啟 YtCar 後會從選好的影片開始播）"
+        else "🚗 車機未連線（在 Android Auto 開啟 YtCar 後，點影片就會送到車機）"
         title.text = if (s.videoId == null) "尚未播放" else (if (s.playing) "▶ " else "⏸ ") + s.title
         seek.max = maxOf(s.duration, 1)
         if (!dragging) {
