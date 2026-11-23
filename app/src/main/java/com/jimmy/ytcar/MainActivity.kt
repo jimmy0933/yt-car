@@ -136,7 +136,7 @@ class MainActivity : AppCompatActivity() {
         status.text = if (s.carConnected && s.surfaceReady) "🚗 車機已連線"
         else if (s.carConnected) "🚗 車機已連線，但 YtCar 畫面不在前景（在車機開啟 YtCar 後會從選好的影片開始播）"
         else "🚗 車機未連線（在 Android Auto 開啟 YtCar 後，點影片就會送到車機）"
-        debug.text = s.events.joinToString("\n")
+        debug.text = "YtCar v${BuildConfig.VERSION_NAME}\n" + (if (s.events.isEmpty()) "尚無車機事件（車機還沒有啟動 YtCar）" else s.events.joinToString("\n"))
         title.text = if (s.videoId == null) "尚未播放" else (if (s.playing) "▶ " else "⏸ ") + s.title
         seek.max = maxOf(s.duration, 1)
         if (!dragging) {
