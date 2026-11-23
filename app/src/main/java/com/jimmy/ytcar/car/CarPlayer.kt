@@ -131,12 +131,26 @@ class CarPlayer(context: Context) : CarPlayerHandle {
         }
     }
 
+    /** 離開車機畫面前先暫停影片並載入空白頁，確保聲音一定停掉 */
+    fun stopPlayback() {
+        wantPlaying = false
+        runCatching {
+            web.evaluateJavascript("document.querySelectorAll('video').forEach(function(v){v.pause();})", null)
+            web.onPause()
+            web.loadUrl("about:blank")
+        }
+    }
+
     fun destroy() {
         destroyed = true
         handler.removeCallbacksAndMessages(null)
         media.release()
-        web.stopLoading()
-        web.destroy()
+        runCatching {
+            web.stopLoading()
+            (web.parent as? android.view.ViewGroup)?.removeView(web)
+            web.removeAllViews()
+            web.destroy()
+        }
     }
 
     companion object {

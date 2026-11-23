@@ -55,13 +55,15 @@ class SurfaceRenderer(private val context: Context) : SurfaceCallback {
     override fun onSurfaceDestroyed(container: SurfaceContainer) = release()
 
     fun release() {
-        player?.let {
-            PlaybackController.detach(it)
-            it.destroy()
-        }
+        val p = player
         player = null
+        if (p != null) {
+            PlaybackController.detach(p)
+            p.stopPlayback() // 先停掉聲音，再拆畫面
+        }
         runCatching { presentation?.dismiss() }
         presentation = null
+        p?.destroy() // 視窗關閉、WebView 脫離之後才能銷毀
         virtualDisplay?.release()
         virtualDisplay = null
     }

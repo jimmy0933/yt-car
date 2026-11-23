@@ -21,6 +21,11 @@ class PlayerScreen(carContext: CarContext) : Screen(carContext) {
                 carContext.getCarService(AppManager::class.java).setSurfaceCallback(renderer)
             }
 
+            // 從別的 App（例如導航）切回來時，重新註冊畫面回呼，確保車機會再給我們畫面
+            override fun onStart(owner: LifecycleOwner) {
+                carContext.getCarService(AppManager::class.java).setSurfaceCallback(renderer)
+            }
+
             override fun onDestroy(owner: LifecycleOwner) {
                 carContext.getCarService(AppManager::class.java).setSurfaceCallback(null)
                 renderer.release()
